@@ -3,7 +3,7 @@ Show the effects of trace length, impedance, and rise time on electrical reflect
 
 [<img src="./media/reflections.svg" width="400">]()
 
-[<img src="./media/StubsVideoSrc100.gif" width="400">]()
+[<img src="./media/StubsVideoSrc100.gif" width="300">]()
 
-[<img src="./media/StubsVideoSrc20.gif" width="400">]()
+[<img src="./media/StubsVideoSrc20.gif" width="300">]()
 
