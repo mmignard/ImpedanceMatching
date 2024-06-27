@@ -21,11 +21,11 @@ from PyLTSpice import SimCommander
 
 fn = '.\\LTSpice\\singleTrace'
 tRise = 1               #rise time in nS
-fracToMid = 1/4         #fraction of total length until signal is sampled (using two Tlines so can see voltage at this point)
+fracToMid = 1/2         #fraction of total length until signal is sampled (using two Tlines so can see voltage at this point)
 tdT1 = fracToMid*tRise  #propagation delay of first transmission line
 tdT2 = tRise - tdT1     #propagation delay of second transmission line
-tStart = 10             #little delay at beginning of simulation, probably not necessary
-tEnd = tStart+10*tRise  #length of simulation
+tStart = 0              #little delay at beginning of simulation, probably not necessary
+tEnd = tStart+20*tRise  #length of simulation
 zSource = 20            #impedance of source
 zTrace = 100            #impedance of transmission lines
 zTermination = 1e6      #impedance of termination
@@ -36,7 +36,7 @@ def RunSim(fn,tdT1,tdT2,zSource=20,zTrace=100,zTerm=1e6):
     LTC.set_component_value('RL', f'{zTermination}')
     LTC.set_element_model('T1', f'Td={tdT1}n Z0={zTrace}')
     LTC.set_element_model('T2', f'Td={tdT2}n Z0={zTrace}')
-    LTC.set_element_model('V1', f'PULSE(0 1 {tStart}n {tRise}n {tRise}n 380n 800n 10)')
+    LTC.set_element_model('V1', f'PULSE(0 1 {tStart}n {tRise}n {tRise}n 9n {tEnd}n 1)')
     LTC.add_instructions(f'.tran {tEnd}n')
     LTC.run()
     LTC.wait_completion()
@@ -49,75 +49,40 @@ def PlotTraces(fn):
     x = LTR.get_trace('time')  # Gets the time axis
     steps = LTR.get_steps()
     for step in range(len(steps)):
-        plt.plot((x.get_time_axis(step)*1e9-tStart)/tRise, VVS.get_wave(step),':', label='source')
+        plt.plot((x.get_time_axis(step)*1e9-tStart)/tRise, VVL.get_wave(step),'--', label='load')
     for step in range(len(steps)):
         plt.plot((x.get_time_axis(step)*1e9-tStart)/tRise, VVM.get_wave(step), label='middle')
     for step in range(len(steps)):
-        plt.plot((x.get_time_axis(step)*1e9-tStart)/tRise, VVL.get_wave(step),'--', label='load')
+        plt.plot((x.get_time_axis(step)*1e9-tStart)/tRise, VVS.get_wave(step),':', label='source')
 
-plt.figure(figsize=(5,8),dpi=150)
-if zTermination > 1000:
-    plt.suptitle(f'impedance mismatch reflections\nzSrc={zSource}Ω, zTrace={zTrace}Ω, zTerm=open')
-else:    
-    plt.suptitle(f'impedance mismatch reflections\nzSrc={zSource}Ω, zTrace={zTrace}Ω, zTerm={zTermination}Ω')
+plt.figure(figsize=(8,8),dpi=150)
+# if zTermination > 1000:
+#     plt.suptitle(f'impedance mismatch reflections\nzSrc={zSource}Ω, zTrace={zTrace}Ω, zTerm=open')
+# else:    
+#     plt.suptitle(f'impedance mismatch reflections\nzSrc={zSource}Ω, zTrace={zTrace}Ω, zTerm={zTermination}Ω')
+plt.suptitle(f'Voltage versus time using LTSpice, zTrace={zTrace}', y=0.92)
 
-lengths = np.asarray([1,0.5,0.33,0.25])
-for L in np.arange(lengths.size):
-    plt.subplot(lengths.size,1,L+1)
-    lenTotal = lengths[L] #total transmission line length as a fraction of rise time
-    RunSim(fn,lenTotal*tdT1,lenTotal*tdT2,zSource,zTrace)
+params = [[321,0.25,20,'fine everywhere'],[322,0.25,100,'fine everywhere'],
+          [323,0.5,20,'undershoot bad'],[324,0.5,100,'fine everywhere'],
+          [325,1,20,'undershoot bad'],[326,1,100,'load ok, problem near source']] #[subplot,length,zSrc]
+for i in range(len(params)):
+    plt.subplot(params[i][0])
+    lenTotal = params[i][1] #total transmission line length as a fraction of rise time
+    RunSim(fn,lenTotal*tdT1,lenTotal*tdT2,params[i][2],zTrace)
     PlotTraces(fn)
     plt.grid(True)
-    if 0==L:
-        plt.ylabel('voltage (source=1V)')
-    plt.xlim(0,10)
-    plt.ylim(0,1.75)
-    plt.text(1.8,0.1,f'length = {lenTotal}*rise')
+    plt.xlim(0,20)
+    plt.ylim(-0.8,1.8)
+    plt.text(0.1,-0.7,f'length={lenTotal}, zSrc={params[i][2]}')
+    if i%2==0:
+        plt.ylabel('voltage')
+    if i==4 or i==5:
+        plt.xlabel('time (units of rise time)')
 
 plt.legend()
 plt.xlabel('time (scaled by rise time)')
-#plt.savefig('singleTrace.svg', bbox_inches='tight')
+plt.savefig('./media/LTS_reflections_single.svg', bbox_inches='tight')
 #plt.savefig('singleTrace.jpg', bbox_inches='tight')
-plt.show()
-
-##########################################################################
-###  max under/overshoot
-###  
-##########################################################################
-
-plt.figure(figsize=(5,4),dpi=150)
-plt.suptitle(f'worst case under/overshoot\nzTrace={zTrace}Ω, zTerm=open')
-
-zSrc = np.asarray([100,20])
-for z in np.arange(zSrc.size):
-    plt.subplot(zSrc.size,1,z+1)
-    lenTotal = 0.5 #total transmission line length as a fraction of rise time
-    zSource = zSrc[z]
-    RunSim(fn,lenTotal*tdT1,lenTotal*tdT2,zSource,zTrace)
-    LTR = RawRead(fn+'_1.raw')    
-    VVL = LTR.get_trace('V(vl)')
-    x = LTR.get_trace('time')  # Gets the time axis
-    steps = LTR.get_steps()
-    for step in range(len(steps)):
-        plt.plot((x.get_time_axis(step)*1e9-tStart)/tRise, VVL.get_wave(step))
-    plt.grid(True)
-    plt.xlim(0,10)
-    plt.ylim(0,1.75)
-    plt.text(1.8,0.1,f'length = {lenTotal}*rise, zSrc={zSource}Ω')
-    if 0==z:
-        plt.ylabel('voltage (source=1V)')
-    if zSource<zTrace:
-        overshoot = 2/(1+zSource/zTrace)
-        undershoot = 2/(1+zSource/zTrace)*(1+(zSource-zTrace)/(zSource+zTrace))
-        plt.plot([1.5,4],[overshoot,overshoot],'k:')    
-        plt.plot([2.5,4],[undershoot,undershoot],'k:')    
-        plt.text(4,overshoot-0.05,f'{overshoot:.2f}')
-        plt.text(4,undershoot-0.05,f'{undershoot:.2f}')
-
-#plt.legend()
-plt.xlabel('time (scaled by rise time)')
-#plt.savefig('overshoot.svg', bbox_inches='tight')
-#plt.savefig('overshoot.jpg', bbox_inches='tight')
 plt.show()
 
 ##########################################################################

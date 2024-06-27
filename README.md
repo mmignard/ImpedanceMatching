@@ -26,7 +26,7 @@ $$rightWave[0] = \frac {V_{src}(t)}{1 + \frac{Z_{src}}{Z_{trace}}}$$
 
 The voltage at each point on the transmission line is the sum of the right and left waves at that point.
 
-The plots below show the voltage on a transmission for a square-like voltage source with a linear ramp for the rising and falling edges. The edge rate of the ramp is 1, and the propagation speed is also 1. These can be scaled trivially. If the edge rate of interest is 2nS, and the propagation speed is 150mm/nS, then a scaled length of 0.25 has a physical length of 0.25 * 150mm/nS * 2nS = 75mm. Similarly, 20 on the horizontal time axis means 20*2nS = 40nS. These are typical numbers for CMOS drivers on a PCB. Use something like [https://saturnpcb.com/saturn-pcb-toolkit/]() to determine more exact propagation speeds. The two graphs on the top have source impedances matched to the transmission line impedance. The two on the bottom have source impedances that is typical of the output impedance for CMOS outputs, and the undershoot with a length of 0.5 * $t_{rise}$ is likely to cause problems for a CMOS input.
+The plots below show the voltage on a transmission for a square-like voltage source with a linear ramp for the rising and falling edges. The edge rate of the ramp is 1, and the propagation speed is also 1. These can be scaled trivially. If the edge rate of interest is 2nS, and the propagation speed is 150mm/nS, then a scaled length of 0.25 has a physical length of 0.25 * 150mm/nS * 2nS = 75mm. Similarly, 20 on the horizontal time axis means 20*2nS = 40nS. These are typical numbers for CMOS drivers on a PCB. Use something like [https://saturnpcb.com/saturn-pcb-toolkit/]() to determine more exact propagation speeds. The three graphs on the right have source impedances matched to the transmission line impedance. The three on the left have source impedances that is typical of the output impedance for CMOS outputs, and the undershoot with a length of 0.5 * $t_{rise}$ is likely to cause problems for a CMOS input.
 
 [<img src="./media/reflections.svg" width="600">]()
 
@@ -37,4 +37,13 @@ The two animated GIFs below are the same data as above, but instead of plotting 
 ## Finding source impedance
 
 ## LTSpice simulations
+
+Exactly the results are obtained with LTSpice simulation as with the previous left- and right-going wave simulations, as shown in the plot below.
+
+[<img src="./media/LTS_reflections_single.svg" width="600">]()
+
+The code that generated this plot using LTSpice is in (https://github.com/mmignard/ImpedanceMatching/blob/main/TlineLTSpice.py). LTSpice is a little slower, but the advantage is it is much easier to play with different termination schemes. For instance, the plot above was created using the LTSpice schematic shown here:
+
+[<img src="./media/singleTrace.png" width="300">]()
+
 
