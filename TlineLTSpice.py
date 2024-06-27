@@ -245,14 +245,14 @@ plt.show()
 ###  
 ##########################################################################
 
-fn = 'singleTrace_loadRC'
+fn = '.\\LTSpice\\singleTrace_loadRC'
 tRise = 1               #rise time in nS
-fracToMid = 1/4         #fraction of total length until signal is sampled (using two Tlines so can see voltage at this point)
+fracToMid = 1/2         #fraction of total length until signal is sampled (using two Tlines so can see voltage at this point)
 tdT1 = fracToMid*tRise  #propagation delay of first transmission line
 tdT2 = tRise - tdT1     #propagation delay of second transmission line
-tStart = 10             #little delay at beginning of simulation, probably not necessary
-tEnd = tStart+50*tRise  #length of simulation
-zSource =20             #impedance of source
+tStart = 0              #little delay at beginning of simulation, probably not necessary
+tEnd = tStart+20*tRise  #length of simulation
+zSource = 20            #impedance of source
 zTrace = 100            #impedance of transmission lines
 zTermination = 100      #impedance of termination
 
@@ -263,39 +263,34 @@ def RunSim(fn,tdT1,tdT2,zSource=20,zTrace=100,zTerm=1e6,CL=10):
     LTC.set_component_value('RL', f'{zTermination}')
     LTC.set_element_model('T1', f'Td={tdT1}n Z0={zTrace}')
     LTC.set_element_model('T2', f'Td={tdT2}n Z0={zTrace}')
-    LTC.set_element_model('V1', f'PULSE(0 1 {tStart}n {tRise}n {tRise}n 380n 800n 10)')
+    LTC.set_element_model('V1', f'PULSE(0 1 {tStart}n {tRise}n {tRise}n 9n {tEnd}n 1)')
     LTC.add_instructions(f'.tran {tEnd}n')
     LTC.run()
     LTC.wait_completion()
     
-plt.figure(figsize=(5,8),dpi=150)
-if zTermination > 1000:
-    plt.suptitle(f'Parallel load RC termination\nzSrc={zSource}Ω, zTrace={zTrace}Ω, zTerm=open')
-else:    
-    plt.suptitle(f'Parallel load RC termination\nzSrc={zSource}Ω, zTrace={zTrace}Ω, zTerm={zTermination}Ω')
+plt.figure(figsize=(4,5),dpi=150)
+plt.suptitle(f'Parallel load termination\nzSrc={zSource}Ω, zTrace={zTrace}Ω, zTerm={zTermination}Ω||xx pF')
 
-CLs = np.asarray([1,10,50,100])
+CLs = np.asarray([5,20,100])
 for cl in np.arange(CLs.size):
     plt.subplot(CLs.size,1,cl+1)
     lenTotal = 2 #total transmission line length as a fraction of rise time
     RunSim(fn,lenTotal*tdT1,lenTotal*tdT2,zSource,zTrace,1e6,CLs[cl])
     PlotTraces(fn)
-    plt.plot([0,11],[0.8,0.8],'k:')   
-    plt.text(11,0.7,'0.8')
+    #plt.plot([0,11],[0.8,0.8],'k:')   
+    #plt.text(11,0.7,'0.8')
     plt.grid(True)
-    if 0==cl:
-        plt.ylabel('voltage (source=1V)')
+    plt.ylabel('voltage')
         #plt.annotate('Worrisome transition', xy=(3.5,0.5), xytext=(7.5,0.75), arrowprops=dict(facecolor='black', width=1, headwidth=5, headlength=8))
-    if (CLs.size-1)==cl:
-        plt.annotate('Worrisome transition', xy=(2,0.85), xytext=(4,1.3), arrowprops=dict(facecolor='black', width=1, headwidth=5, headlength=8))
+    # if (CLs.size-1)==cl:
+    #     plt.annotate('Worrisome transition', xy=(2,0.85), xytext=(4,1.3), arrowprops=dict(facecolor='black', width=1, headwidth=5, headlength=8))
     plt.xlim(0,20)
-    plt.ylim(0,1.75)
-    plt.text(5,0.1,f'CL = {CLs[cl]}pF')
+    plt.ylim(-0.8,1.8)
+    plt.text(0.1,-0.7,f'CL = {CLs[cl]}pF')
 
 plt.legend()
 plt.xlabel('time (scaled by rise time)')
-#plt.savefig('parLoadRCterm.svg', bbox_inches='tight')
-#plt.savefig('parLoadRCterm.jpg', bbox_inches='tight')
+plt.savefig('./media/parLoadRCterm.svg', bbox_inches='tight')
 plt.show()
 
 ##########################################################################

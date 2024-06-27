@@ -32,18 +32,26 @@ The plots below show the voltage on a transmission for a square-like voltage sou
 
 The two animated GIFs below are the same data as above, but instead of plotting V versus time, they show V versus position. The transmission line lengths are 0.25, 0.5, and 1 x $t_{rise}$. The Python code to create these plots is in the file [MakeWaves.py](https://github.com/mmignard/ImpedanceMatching/blob/main/MakeWaves.py)
 
-[<img src="./media/StubsVideo.gif" width="300">]()
+[<img src="./media/StubsVideo.gif" width="700">]()
 
-## Finding source impedance
+## Obtaining source impedance from IBIS files
 
 ## LTSpice simulations
 
-Exactly the results are obtained with LTSpice simulation as with the previous left- and right-going wave simulations, as shown in the plot below.
+The results with an LTSpice simulation are identical to the previous simulation using left- and right-going waves. Compare the plot below with the first plot above.
 
 [<img src="./media/LTS_reflections_single.svg" width="600">]()
 
-The code that generated this plot using LTSpice is in (https://github.com/mmignard/ImpedanceMatching/blob/main/TlineLTSpice.py). LTSpice is a little slower, but the advantage is it is much easier to play with different termination schemes. For instance, the plot above was created using the LTSpice schematic shown here:
+The Pyton code that generated this plot using LTSpice is in [TlineLTSpice.py](https://github.com/mmignard/ImpedanceMatching/blob/main/TlineLTSpice.py). LTSpice is a little slower, but the advantage is it is much easier to play with different termination schemes. For instance, the plot above was created using this LTSpice schematic with an essentially open circuit termination:
 
-[<img src="./media/singleTrace.png" width="300">]()
+[<img src="./media/singleTrace.png" width="700">]()
+
+Some application notes suggest terminating CMOS lines with parallel RC circuit as shown in this schematic:
+
+[<img src="./media/parLoadRCterm.png" width="700">]()
+
+But the best that can do is make the voltage on the line constant for a while at $\frac {V_{source}}{1+ \frac {Z_{source}{Z_{term}}$, which for 20Ω source and 100Ω termination is 0.83, and leaves little voltage margin (usually Vih=0.8Vdd). For 50Ω impedance lines the situation is worse. Below are some LTSPice simulations with several termination capacitor values.
+
+[<img src="./media/parLoadRCterm.svg" width="400">]()
 
 
