@@ -3,7 +3,7 @@
 Created on Wed Oct 25 10:00:16 2023
 
 @author: MarcMignard
-ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρσςτυφχψωάέήϊίόύϋώΆΈΉΊΌΎΏ±≥≤ΪΫ÷≈°√ⁿ²ˑ
+ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρσςτυφχψωάέήϊίόύϋώΆΈΉΊΌΎΏ±≥≤ΪΫ÷≈°√ⁿ²ˑ∂
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -41,31 +41,33 @@ def MakeWaves(srcDrv,zSrc,zTrace,zTerm,length,nX,endT):
     return totalWave
 
 #rise time and velocity are one unit by definition
+zSrc = 100      #source impedance
+zTrace = 100    #characteristic impedance of transmission line
+zTerm = 1e6     #load termination impedance
 length = 0.5    #length in units of rise time
-nX = 50         #number of simulation steps in distance dimension
-nT = 100        #number of simulation steps in time dimension. Generally this needs to be > nX
+nX = 1000       #number of simulation steps in distance dimension
+nT = 2000       #number of simulation steps in time dimension. Generally this needs to be > nX
 endT = 20       #simulation end time in units of propagation delay along total length
 maxV = 1        #maximum drive voltage
-zTrace = 100    #characteristic impedance of transmission line
-zSrc = 100      #source impedance
-zTerm = 1e6     #load termination impedance
 sRise = np.linspace(0,endT/2,int(nT/2))
 #srcDrv contains both a rising edge and a falling edge
 srcDrv = np.clip(np.concatenate((maxV*sRise,maxV*(1-sRise))),0,maxV)
 t = np.linspace(0,endT,nT)
 
 #show what the source drive waveform looks like
-plt.figure()
-plt.plot(t,srcDrv)
-plt.show()
+# plt.figure()
+# plt.plot(t,srcDrv)
+# plt.show()
 
 ##########################################################################
 ###  Subplots of voltage versus time
 ###     
 ##########################################################################
-params = [[221,0.25,100],[222,0.5,100],[223,0.25,20],[224,0.5,20]] #[subplot,length,zSrc]
+params = [[321,0.25,20,'fine everywhere'],[322,0.25,100,'fine everywhere'],
+          [323,0.5,20,'undershoot bad'],[324,0.5,100,'fine everywhere'],
+          [325,1,20,'undershoot bad'],[326,1,100,'load ok, problem near source']] #[subplot,length,zSrc]
 plt.figure(figsize=(8,8),dpi=150)
-plt.suptitle(f'Voltage versus time of several stub lengths and source impedances, zTrace={zTrace}')
+plt.suptitle(f'Voltage versus time of several stub lengths and source impedances, zTrace={zTrace}', y=0.92)
 
 for i in range(len(params)):
     length = params[i][1]     #length in units of rise time
@@ -74,19 +76,27 @@ for i in range(len(params)):
     Vovershoot = maxV*2/(1+zSrc/zTrace)   
     Vundershoot = maxV*2/(1+zSrc/zTrace)*(1+(zSrc-zTrace)/(zSrc+zTrace))
     plt.subplot(params[i][0])
-    plt.title(f'length={length}, zSrc={zSrc}')
+    #plt.title(f'length={length}, zSrc={zSrc}')
     plt.plot(t,totalWave[:,-1],'--',label='load')
-    plt.plot(t,totalWave[:,int(nX/4)],label='mid 1/4')
+    plt.plot(t,totalWave[:,int(nX/2)],label='middle')
     plt.plot(t,totalWave[:,0],':',label='source')
-    plt.plot([0,t[-1]],[Vovershoot,Vovershoot],'k:')
-    plt.plot([0,t[-1]],[Vundershoot,Vundershoot],'k:')
     plt.xlim([-0.1,t[-1]+0.1])
     plt.ylim([-0.8,maxV*1.8])
     plt.grid(True)
-    plt.legend()
-    if i==0 or i==2:
+    plt.legend(loc='upper right')
+    plt.text(0.1,-0.7,f'length={length}, zSrc={zSrc}')
+    plt.text(0.1,-0.4,params[i][3])
+    if i==2:
+        plt.annotate('', xy=(2.5,Vundershoot), xytext=(2,-0.2), arrowprops=dict(facecolor='black', width=1, headwidth=5, headlength=8))
+    if i==4:
+        plt.annotate('', xy=(4,Vundershoot), xytext=(2.5,-0.2), arrowprops=dict(facecolor='black', width=1, headwidth=5, headlength=8))
+    if i==5:
+        plt.annotate('', xy=(2,0.5), xytext=(4,-0.2), arrowprops=dict(facecolor='black', width=1, headwidth=5, headlength=8))
+    if i%2==0:
         plt.ylabel('voltage')
-    if i==2 or i==3:
+        plt.plot([0,t[-1]],[Vovershoot,Vovershoot],'k:')
+        plt.plot([0,t[-1]],[Vundershoot,Vundershoot],'k:')
+    if i==4 or i==5:
         plt.xlabel('time (units of rise time)')
 plt.savefig('./media/reflections.svg', bbox_inches='tight')
 plt.show()
@@ -95,42 +105,52 @@ plt.show()
 ###   Animation plot of voltage versus position
 ###     
 ##########################################################################
-zSrc=20
-zTrace=100
+'''
+Need large nX=1000,nT=2000 for simulation of voltage vs time to match LTSpice.
+But want small nX=50,nT=100 to make reasonable sized animated GIFs of voltage vs position.
+'''
+zSrc = 100      #source impedance
+zTrace = 100    #characteristic impedance of transmission line
+zTerm = 1e6     #load termination impedance
+nX = 50         #number of simulation steps in distance dimension
+nT = 100        #number of simulation steps in time dimension. Generally this needs to be > nX
+endT = 20       #simulation end time in units of propagation delay along total length
+maxV = 1        #maximum drive voltage
+sRise = np.linspace(0,endT/2,int(nT/2))
+#srcDrv contains both a rising edge and a falling edge
+srcDrv = np.clip(np.concatenate((maxV*sRise,maxV*(1-sRise))),0,maxV)
+t = np.linspace(0,endT,nT)
+
 xOne = np.linspace(0,1,nX)
 waveOne = MakeWaves(srcDrv,zSrc,zTrace,zTerm,1,nX,endT)
 xHalf = np.linspace(0,0.5,nX)
 waveHalf = MakeWaves(srcDrv,zSrc,zTrace,zTerm,0.5,nX,endT)
-xThird = np.linspace(0,0.33,nX)
-waveThird = MakeWaves(srcDrv,zSrc,zTrace,zTerm,0.33,nX,endT)
 xQuarter = np.linspace(0,0.25,nX)
 waveQuarter = MakeWaves(srcDrv,zSrc,zTrace,zTerm,0.25,nX,endT)
 
-def updateline(num, waveOne, axOne, waveHalf, axHalf, waveThird, axThird, waveQuarter, axQuarter):
+def updateline(num, waveOne, axOne, waveHalf, axHalf, waveQuarter, axQuarter):
     axOne.set_data(xOne,waveOne[num,:])
     axHalf.set_data(xHalf,waveHalf[num,:]+1)
-    axThird.set_data(xThird,waveThird[num,:]+2)
-    axQuarter.set_data(xQuarter,waveQuarter[num,:]+3)
+    axQuarter.set_data(xQuarter,waveQuarter[num,:]+2)
     #time_text.set_text("Points: %.0f" % int(num))
-    return axOne,axHalf, axThird, axQuarter
+    return axOne,axHalf, axQuarter
 
 fig, ax = plt.subplots(figsize=(4,4),dpi=150)
 plt.grid(True)
-plt.title(f'Voltage versus position of several stub lengths,\nzSrc={zSrc}, zTrace={zTrace}')
+plt.title(f'Voltage versus position,\nzSrc={zSrc}, zTrace={zTrace}')
 #plt.title(f'zSrc={zSrc}, zTrace={zTrace}')
-plt.xlabel('position (units of tRise*vPropagation)')
+plt.xlabel('position (units of tRiseˑvelocity)')
 plt.ylabel('voltage')
 
-ax.set_ylim(-0.8, 4.2)
+ax.set_ylim(-0.8, 3.5)
 ax.set_xlim(0, 1)
 axOne = ax.plot([], [], 'r-', label="One")[0]
-axHalf = ax.plot([], [], 'g-', label="Half")[0]
-axThird = ax.plot([], [], 'b-', label="Third")[0]
+axHalf = ax.plot([], [], 'b-', label="Half")[0]
 axQuarter = ax.plot([], [], 'k-', label="Quarter")[0]
 
 #For animations to work in Spyder IDE, have to run '%matplotlib qt5', switch back with '%matplotlib inline'
 #Change to interval=10 to save video. Real time animation runs slower, so use interval=5
-anim = animation.FuncAnimation(fig, updateline, frames=waveHalf.shape[0], interval=5, blit=True, fargs=(waveOne, axOne, waveHalf, axHalf, waveThird, axThird, waveQuarter, axQuarter))
+anim = animation.FuncAnimation(fig, updateline, frames=waveHalf.shape[0], interval=1, blit=True, fargs=(waveOne, axOne, waveHalf, axHalf, waveQuarter, axQuarter))
 
 #Steps required to create html5 videos:
 #  1) pip install ffmpeg-python

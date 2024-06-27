@@ -26,16 +26,15 @@ $$rightWave[0] = \frac {V_{src}(t)}{1 + \frac{Z_{src}}{Z_{trace}}}$$
 
 The voltage at each point on the transmission line is the sum of the right and left waves at that point.
 
-The plots below show the voltage on a transmission for a square-like voltage source with a linear ramp for the rising and falling edges. The edge rate of the ramp is 1, and the propagation speed is also 1. These can be scaled trivally. If the edge rate of interest is 2nS, and the propagation speed is 150mm/nS, then a length of 0.25 is 0.25 * 150mm/nS * 2nS = 75mm. Similarly, 20 on the horizontal time axis means 20*2nS = 40nS. These are typical numbers for CMOS drivers on a PCB. Use something like [https://saturnpcb.com/saturn-pcb-toolkit/]() to determine more exact propagation speeds.
-
-The two graphs on the top have source impedances matched to the transmission line impedance. The two on the bottom have source impedances that is typical of the output impedance for CMOS outputs, and likely the undershoot even with a length of 0.25 * $t_{rise}$ is enough to cause problems for a CMOS input.
-
+The plots below show the voltage on a transmission for a square-like voltage source with a linear ramp for the rising and falling edges. The edge rate of the ramp is 1, and the propagation speed is also 1. These can be scaled trivially. If the edge rate of interest is 2nS, and the propagation speed is 150mm/nS, then a scaled length of 0.25 has a physical length of 0.25 * 150mm/nS * 2nS = 75mm. Similarly, 20 on the horizontal time axis means 20*2nS = 40nS. These are typical numbers for CMOS drivers on a PCB. Use something like [https://saturnpcb.com/saturn-pcb-toolkit/]() to determine more exact propagation speeds. The two graphs on the top have source impedances matched to the transmission line impedance. The two on the bottom have source impedances that is typical of the output impedance for CMOS outputs, and the undershoot with a length of 0.5 * $t_{rise}$ is likely to cause problems for a CMOS input.
 
 [<img src="./media/reflections.svg" width="400">]()
 
-The two animated GIFs below are the same data as above, but instead of plotting V versus time, they show V versus position. The transmission line lengths are 0.25, 0.33, 0.5, and 1 x $t_{rise}$. The Python code to create these plots is in the file [MakeWaves.py](https://github.com/mmignard/ImpedanceMatching/blob/main/MakeWaves.py)
+The two animated GIFs below are the same data as above, but instead of plotting V versus time, they show V versus position. The transmission line lengths are 0.25, 0.5, and 1 x $t_{rise}$. The Python code to create these plots is in the file [MakeWaves.py](https://github.com/mmignard/ImpedanceMatching/blob/main/MakeWaves.py)
 
-[<img src="./media/StubsVideoSrc100.gif" width="300">]()
+[<img src="./media/StubsVideoSrc20.gif" width="300">]() [<img src="./media/StubsVideoSrc100.gif" width="300">]()
 
-[<img src="./media/StubsVideoSrc20.gif" width="300">]()
+## Finding source impedance
+
+## LTSpice simulations
 
