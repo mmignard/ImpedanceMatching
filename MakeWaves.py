@@ -94,8 +94,8 @@ for i in range(len(params)):
         plt.annotate('', xy=(2,0.5), xytext=(4,-0.2), arrowprops=dict(facecolor='black', width=1, headwidth=5, headlength=8))
     if i%2==0:
         plt.ylabel('voltage')
-        plt.plot([0,t[-1]],[Vovershoot,Vovershoot],'k:')
-        plt.plot([0,t[-1]],[Vundershoot,Vundershoot],'k:')
+        #plt.plot([0,t[-1]],[Vovershoot,Vovershoot],'k:')
+        #plt.plot([0,t[-1]],[Vundershoot,Vundershoot],'k:')
     if i==4 or i==5:
         plt.xlabel('time (units of rise time)')
 plt.savefig('./media/reflections.svg', bbox_inches='tight')
@@ -122,51 +122,70 @@ srcDrv = np.clip(np.concatenate((maxV*sRise,maxV*(1-sRise))),0,maxV)
 t = np.linspace(0,endT,nT)
 
 xOne = np.linspace(0,1,nX)
-waveOne = MakeWaves(srcDrv,zSrc,zTrace,zTerm,1,nX,endT)
+waveOne20 = MakeWaves(srcDrv,20,zTrace,zTerm,1,nX,endT)
+waveOne100 = MakeWaves(srcDrv,100,zTrace,zTerm,1,nX,endT)
 xHalf = np.linspace(0,0.5,nX)
-waveHalf = MakeWaves(srcDrv,zSrc,zTrace,zTerm,0.5,nX,endT)
+waveHalf20 = MakeWaves(srcDrv,20,zTrace,zTerm,0.5,nX,endT)
+waveHalf100 = MakeWaves(srcDrv,100,zTrace,zTerm,0.5,nX,endT)
 xQuarter = np.linspace(0,0.25,nX)
-waveQuarter = MakeWaves(srcDrv,zSrc,zTrace,zTerm,0.25,nX,endT)
+waveQuarter20 = MakeWaves(srcDrv,20,zTrace,zTerm,0.25,nX,endT)
+waveQuarter100 = MakeWaves(srcDrv,100,zTrace,zTerm,0.25,nX,endT)
 
-def updateline(num, waveOne, axOne, waveHalf, axHalf, waveQuarter, axQuarter):
-    axOne.set_data(xOne,waveOne[num,:])
-    axHalf.set_data(xHalf,waveHalf[num,:]+1)
-    axQuarter.set_data(xQuarter,waveQuarter[num,:]+2)
+def updateline(num, axOne20, axHalf20, axQuarter20, waveOne20, waveHalf20, waveQuarter20, 
+               axOne100, axHalf100, axQuarter100, waveOne100, waveHalf100, waveQuarter100):
+    axOne20.set_data(xOne,waveOne20[num,:])
+    axHalf20.set_data(xHalf,waveHalf20[num,:]+1)
+    axQuarter20.set_data(xQuarter,waveQuarter20[num,:]+2)
+    axOne100.set_data(xOne,waveOne100[num,:])
+    axHalf100.set_data(xHalf,waveHalf100[num,:]+1)
+    axQuarter100.set_data(xQuarter,waveQuarter100[num,:]+2)
     #time_text.set_text("Points: %.0f" % int(num))
-    return axOne,axHalf, axQuarter
+    return axOne20,axHalf20,axQuarter20,axOne100,axHalf100,axQuarter100
 
-fig, ax = plt.subplots(figsize=(4,4),dpi=150)
+fig, (ax20, ax100) = plt.subplots(1,2,figsize=(7,4),dpi=150)
+plt.suptitle(f'Voltage versus position, zTrace={zTrace}') #, y=0.92)
+plt.subplot(121)
+plt.title(f'zSrc=20')
 plt.grid(True)
-plt.title(f'Voltage versus position,\nzSrc={zSrc}, zTrace={zTrace}')
-#plt.title(f'zSrc={zSrc}, zTrace={zTrace}')
 plt.xlabel('position (units of tRiseˑvelocity)')
 plt.ylabel('voltage')
 
-ax.set_ylim(-0.8, 3.5)
-ax.set_xlim(0, 1)
-axOne = ax.plot([], [], 'r-', label="One")[0]
-axHalf = ax.plot([], [], 'b-', label="Half")[0]
-axQuarter = ax.plot([], [], 'k-', label="Quarter")[0]
+plt.subplot(122)
+plt.title(f'zSrc=100')
+plt.grid(True)
+plt.xlabel('position (units of tRiseˑvelocity)')
+
+ax20.set_ylim(-0.8, 3.5)
+ax20.set_xlim(0, 1)
+ax100.set_ylim(-0.8, 3.5)
+ax100.set_xlim(0, 1)
+axOne20 = ax20.plot([], [], 'r-', label="One")[0]
+axHalf20 = ax20.plot([], [], 'b-', label="Half")[0]
+axQuarter20 = ax20.plot([], [], 'k-', label="Quarter")[0]
+axOne100 = ax100.plot([], [], 'r-', label="One")[0]
+axHalf100 = ax100.plot([], [], 'b-', label="Half")[0]
+axQuarter100 = ax100.plot([], [], 'k-', label="Quarter")[0]
 
 #For animations to work in Spyder IDE, have to run '%matplotlib qt5', switch back with '%matplotlib inline'
 #Change to interval=10 to save video. Real time animation runs slower, so use interval=5
-anim = animation.FuncAnimation(fig, updateline, frames=waveHalf.shape[0], interval=1, blit=True, fargs=(waveOne, axOne, waveHalf, axHalf, waveQuarter, axQuarter))
+anim = animation.FuncAnimation(fig, updateline, frames=waveHalf20.shape[0], interval=10, blit=True, fargs=(axOne20, axHalf20, axQuarter20, waveOne20, waveHalf20, waveQuarter20, 
+               axOne100, axHalf100, axQuarter100, waveOne100, waveHalf100, waveQuarter100))
 
 #Steps required to create html5 videos:
 #  1) pip install ffmpeg-python
 #  2) download and install ffmpeg from https://www.ffmpeg.org/download.html
 #  3) add path to ffmpgeg.exe using "edit ENV"
 #  4) in new cmd window, type "ffmpeg -version" to make sure it works
-#printing to file takes a long time
-#ffmpeg is not required just to view the files
-# with open(f"./media/StubsVideoSrc{zSrc}.html", "w") as f:
+# printing to file takes a long time
+# ffmpeg is not required just to view the files
+# with open(f"./media/StubsVideo.html", "w") as f:
 #     print(anim.to_html5_video(), file=f)
 
 # To save the animation using Pillow as a gif (pip install Pillow)
-writer = animation.PillowWriter(fps=60,
-                                metadata=dict(artist='Me'),
-                                bitrate=1800)
-anim.save(f"./media/StubsVideoSrc{zSrc}.gif", writer=writer)
+# writer = animation.PillowWriter(fps=60,
+#                                 metadata=dict(artist='Me'),
+#                                 bitrate=1800)
+# anim.save(f"./media/StubsVideo.gif", writer=writer)
 
 plt.show()
 
