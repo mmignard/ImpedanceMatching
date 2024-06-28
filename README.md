@@ -35,6 +35,7 @@ The two animated GIFs below are the same data as above, but instead of plotting 
 [<img src="./media/StubsVideo.gif" width="700">]()
 
 ## Obtaining source impedance from IBIS files
+[<img src="./media/sourceImpedance" width="700">]()
 
 ## LTSpice simulations
 
@@ -62,7 +63,7 @@ The results of these simulations are below, and the issue is that it slows the t
 
 [<img src="./media/serSourceRCterm.svg" width="400">]()
 
-Here are some oscilloscope plots from a crystal oscillator showing how much source series termination helps with a very long blue wire 'transmission line'.
+Here are some oscilloscope plots from a crystal oscillator showing how much source series termination helps with a very long blue wire 'transmission line'. Notice the very short ground clip on the oscilloscope probe.
 
 [<img src="./media/scopePlots.jpg" width="400">]()
 
