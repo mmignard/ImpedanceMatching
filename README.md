@@ -50,8 +50,20 @@ Some application notes suggest terminating CMOS lines with parallel RC circuit a
 
 [<img src="./media/parLoadRCterm.png" width="700">]()
 
-But the best that can do is make the voltage on the line constant for a while at $\frac {V_{source}}{1+ \frac {Z_{source}{Z_{term}}$, which for 20Ω source and 100Ω termination is 0.83, and leaves little voltage margin (usually Vih=0.8Vdd). For 50Ω impedance lines the situation is worse. Below are some LTSPice simulations with several termination capacitor values.
+But the best that can do is make the voltage on the line constant for a while at $\frac {V_{source}}{1+ \frac {Z_{source}} {Z_{term}}}$, which for 20Ω source and 100Ω termination is 0.83, and leaves essentially no voltage margin (usually $V_{ih,min}=0.8V_{dd}$). For 50Ω impedance lines the situation is worse. Below are some LTSpice simulations with different termination capacitor values.
 
 [<img src="./media/parLoadRCterm.svg" width="400">]()
+
+Other application notes advocate a capacitor at the source to slow the transition times, as shown in the schematic below.
+
+[<img src="./media/serSourceRCterm.png" width="700">]()
+
+The results of these simulations are below, and the issue is that it slows the transition through the no-man's land of $V_{il,max}$ to $V_{ih,min}$. This is likely to cause more problems than it solves.
+
+[<img src="./media/serSourceRCterm.svg" width="400">]()
+
+Here are some oscilloscope plots from a crystal oscillator showing how much source series termination helps with a very long blue wire 'transmission line'.
+
+[<img src="./media/scopePlots.jpg" width="400">]()
 
 
