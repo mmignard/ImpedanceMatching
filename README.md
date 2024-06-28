@@ -35,7 +35,7 @@ The two animated GIFs below are the same data as above, but instead of plotting 
 [<img src="./media/StubsVideo.gif" width="700">]()
 
 ## Obtaining source impedance from IBIS files
-[<img src="./media/sourceImpedance" width="700">]()
+[<img src="./media/sourceImpedance.png" width="700">]()
 
 ## LTSpice simulations
 
