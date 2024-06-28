@@ -37,15 +37,17 @@ The two animated GIFs below are the same data as above, but instead of plotting 
 ## Obtaining source impedance from IBIS files
 [<img src="./media/sourceImpedance.png" width="700">]()
 
+Show table with actual values from the IBIS file, and how much source impedance changes with voltage and temperature.
+
 ## LTSpice simulations
 
-The results with an LTSpice simulation are identical to the previous simulation using left- and right-going waves. Compare the plot below with the first plot above.
-
-[<img src="./media/LTS_reflections_single.svg" width="600">]()
-
-The Pyton code that generated this plot using LTSpice is in [TlineLTSpice.py](https://github.com/mmignard/ImpedanceMatching/blob/main/TlineLTSpice.py). LTSpice is a little slower, but the advantage is it is much easier to play with different termination schemes. For instance, the plot above was created using this LTSpice schematic with an essentially open circuit termination:
+LTSpice gives identical results to the previous simulations. I use Python to call LTspice, to modify element values in the schematic below, and to plot the results. The Python code to do this is in [TlineLTSpice.py](https://github.com/mmignard/ImpedanceMatching/blob/main/TlineLTSpice.py)
 
 [<img src="./media/singleTrace.png" width="700">]()
+
+Compare the results from LTSpice to the first plot above.
+
+[<img src="./media/LTS_reflections_single.svg" width="600">]()
 
 Some application notes suggest terminating CMOS lines with parallel RC circuit as shown in this schematic:
 
@@ -67,4 +69,4 @@ Here are some oscilloscope plots from a crystal oscillator showing how much sour
 
 [<img src="./media/scopePlots.jpg" width="400">]()
 
-
+Show results of using one long line, or V shaped split, or Y shaped split.
